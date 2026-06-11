@@ -1,4 +1,7 @@
-foto_db1.png
+*.png
+foto_db2.png
 *.env
 *.log
+*.pdf
 node_modules/
+/generated/prisma

@@ -1,0 +1,280 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model USERS {
+  id                String       @id @default(uuid())
+  username          String       @unique
+  password_hash     String
+  created_at        DateTime     @default(now())
+  is_active         Boolean      @default(true)
+  updated_at        DateTime     @updatedAt
+  bookings_created  BOOKINGS[]   @relation("BookingCreatedBy")
+  bookings_updated  BOOKINGS[]   @relation("BookingUpdatedBy")
+  customers_created CUSTOMERS[]  @relation("CustomerCreatedBy")
+  customers_updated CUSTOMERS[]  @relation("CustomerUpdatedBy")
+  employee          EMPLOYEES?
+  stays_created     STAYS[]      @relation("StayCreatedBy")
+  stays_updated     STAYS[]      @relation("StayUpdatedBy")
+  user_roles        USER_ROLES[]
+}
+
+model ROLES {
+  id               String             @id @default(uuid())
+  name        String             @unique
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  role_permissions ROLE_PERMISSIONS[]
+  user_roles       USER_ROLES[]
+}
+
+model USER_ROLES {
+  user_id     String
+  role_id     String
+  assigned_at DateTime  @default(now())
+  revoked_at  DateTime?
+  role        ROLES     @relation(fields: [role_id], references: [id])
+  user        USERS     @relation(fields: [user_id], references: [id])
+
+  @@id([user_id, role_id])
+}
+
+model RESOURCES {
+  id            String        @id @default(uuid())
+  name String        @unique
+  permissions   PERMISSIONS[]
+}
+
+model ACTIONS {
+  id          String        @id @default(uuid())
+  name String        @unique
+  permissions PERMISSIONS[]
+}
+
+model PERMISSIONS {
+  id               String             @id @default(uuid())
+  action_id        String
+  resource_id      String
+  action           ACTIONS            @relation(fields: [action_id], references: [id])
+  resource         RESOURCES          @relation(fields: [resource_id], references: [id])
+  role_permissions ROLE_PERMISSIONS[]
+
+  @@unique([resource_id, action_id])
+}
+
+model ROLE_PERMISSIONS {
+  role_id       String
+  permission_id String
+  permission    PERMISSIONS @relation(fields: [permission_id], references: [id])
+  role          ROLES       @relation(fields: [role_id], references: [id])
+
+  @@id([role_id, permission_id])
+}
+
+model POSITIONS {
+  id            String      @id @default(uuid())
+  name String      @unique
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  employees     EMPLOYEES[]
+}
+
+model EMPLOYEES {
+  id             String               @id @default(uuid())
+  first_name     String
+  last_name      String
+  email          String               @unique
+  created_at     DateTime             @default(now())
+  hire_date      DateTime?
+  phone_num      String?
+  position_id    String
+  updated_at     DateTime             @updatedAt
+  user_id        String?              @unique
+  position       POSITIONS            @relation(fields: [position_id], references: [id])
+  user           USERS?               @relation(fields: [user_id], references: [id])
+  schedules      EMPLOYEE_SCHEDULES[]
+  room_cleanings ROOM_CLEANINGS[]
+
+  @@index([position_id])
+}
+
+model EMPLOYEE_SCHEDULES {
+  id          String    @id @default(uuid())
+  employee_id String
+  start_time  DateTime
+  end_time    DateTime
+  employee    EMPLOYEES @relation(fields: [employee_id], references: [id])
+
+  @@index([employee_id])
+}
+
+model CUSTOMERS {
+  id         String     @id @default(uuid())
+  first_name String
+  last_name  String
+  email      String?
+  created_at DateTime   @default(now())
+  created_by String?
+  phone_num  String?
+  updated_at DateTime   @updatedAt
+  updated_by String?
+  bookings   BOOKINGS[]
+  creator    USERS?     @relation("CustomerCreatedBy", fields: [created_by], references: [id])
+  updater    USERS?     @relation("CustomerUpdatedBy", fields: [updated_by], references: [id])
+  orders     ORDERS[]
+  stays      STAYS[]
+
+  @@index([email])
+}
+
+model BOOKINGS {
+  id                 String    @id @default(uuid())
+  customer_id        String
+  created_at         DateTime  @default(now())
+  created_by         String?
+  expected_check_in  DateTime
+  expected_check_out DateTime
+  notes              String?
+  room_id            String
+  status             String
+  updated_at         DateTime  @updatedAt
+  updated_by         String?
+  creator            USERS?    @relation("BookingCreatedBy", fields: [created_by], references: [id])
+  customer           CUSTOMERS @relation(fields: [customer_id], references: [id])
+  room               ROOMS     @relation(fields: [room_id], references: [id])
+  updater            USERS?    @relation("BookingUpdatedBy", fields: [updated_by], references: [id])
+  stay               STAYS?
+
+  @@index([customer_id])
+  @@index([room_id])
+  @@index([status])
+}
+
+model ROOM_TYPES {
+  id          String   @id @default(uuid())
+  name   String   @unique
+  base_price  Decimal  @db.Decimal(12, 2)
+  created_at  DateTime @default(now())
+  description String?
+  updated_at  DateTime @updatedAt
+  rooms       ROOMS[]
+}
+
+model ROOMS {
+  id             String           @id @default(uuid())
+  room_type_id   String
+  room_num       String           @unique
+  created_at     DateTime         @default(now())
+  status         String
+  updated_at     DateTime         @updatedAt
+  bookings       BOOKINGS[]
+  room_type      ROOM_TYPES       @relation(fields: [room_type_id], references: [id])
+  room_cleanings ROOM_CLEANINGS[]
+  stays          STAYS[]
+
+  @@index([room_type_id])
+  @@index([status])
+}
+
+model STAYS {
+  id          String     @id @default(uuid())
+  booking_id  String     @unique
+  customer_id String
+  check_in    DateTime
+  check_out   DateTime?
+  created_at  DateTime   @default(now())
+  created_by  String?
+  room_id     String
+  updated_at  DateTime   @updatedAt
+  updated_by  String?
+  invoices    INVOICES[]
+  booking     BOOKINGS   @relation(fields: [booking_id], references: [id])
+  creator     USERS?     @relation("StayCreatedBy", fields: [created_by], references: [id])
+  customer    CUSTOMERS  @relation(fields: [customer_id], references: [id])
+  room        ROOMS      @relation(fields: [room_id], references: [id])
+  updater     USERS?     @relation("StayUpdatedBy", fields: [updated_by], references: [id])
+
+  @@index([customer_id])
+  @@index([room_id])
+}
+
+model ROOM_CLEANINGS {
+  id          String    @id @default(uuid())
+  room_id     String
+  employee_id String
+  cleaned_at  DateTime  @default(now())
+  notes       String?
+  employee    EMPLOYEES @relation(fields: [employee_id], references: [id])
+  room        ROOMS     @relation(fields: [room_id], references: [id])
+
+  @@index([room_id])
+  @@index([employee_id])
+}
+
+model MENU_ITEMS {
+  id           String        @id @default(uuid())
+  name    String
+  created_at   DateTime      @default(now())
+  is_available Boolean       @default(true)
+  price        Decimal       @db.Decimal(12, 2)
+  updated_at   DateTime      @updatedAt
+  order_items  ORDER_ITEMS[]
+}
+
+model ORDERS {
+  id           String        @id @default(uuid())
+  customer_id  String
+  order_date   DateTime      @default(now())
+  status       String
+  total_amount Decimal       @db.Decimal(12, 2)
+  customer     CUSTOMERS     @relation(fields: [customer_id], references: [id])
+  order_items  ORDER_ITEMS[]
+}
+
+model ORDER_ITEMS {
+  id           String     @id @default(uuid())
+  order_id     String
+  menu_item_id String
+  quantity     Int
+  unit_price   Decimal    @db.Decimal(12, 2)
+  menu_item    MENU_ITEMS @relation(fields: [menu_item_id], references: [id])
+  order        ORDERS     @relation(fields: [order_id], references: [id])
+  measuring_unit_id Int 
+  measuring_unit MEASURING_UNITS @relation(fields:[measuring_unit_id], references:[id])
+
+  @@index([order_id])
+  @@index([menu_item_id])
+}
+
+model INVOICES {
+  id           String         @id @default(uuid())
+  stay_id      String
+  total_amount Decimal        @db.Decimal(12, 2)
+  invoice_date DateTime       @default(now())
+  stay         STAYS          @relation(fields: [stay_id], references: [id])
+  transactions TRANSACTIONS[]
+
+  @@index([stay_id])
+}
+
+model TRANSACTIONS {
+  id             String   @id @default(uuid())
+  invoice_id     String
+  amount         Decimal  @db.Decimal(12, 2)
+  payment_method String
+  payment_date   DateTime @default(now())
+  invoice        INVOICES @relation(fields: [invoice_id], references: [id])
+
+  @@index([invoice_id])
+}
+
+model MEASURING_UNITS {
+  id   Int @id @default(autoincrement())
+  name String  @unique
+  order_items  ORDER_ITEMS[]
+ }

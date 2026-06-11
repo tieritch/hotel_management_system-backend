@@ -1,0 +1,9 @@
+@baseUrl = http://localhost:8000
+
+### Find all users
+GET {{baseUrl}}/api/users
+
+###
+
+### Find user by id
+GET {{baseUrl}}/api/users/7b3c7a1b-f753-4154-8c86-7df836b2cb52
