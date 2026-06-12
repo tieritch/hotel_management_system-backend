@@ -16,9 +16,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 //require("dotenv").config();
-
+dotenv.config();
 const port = process.env.PORT || 8000;
-
 const { userRouter } = require("./routes");
 app.use("/api/users", userRouter);
 app.listen(port, () => {

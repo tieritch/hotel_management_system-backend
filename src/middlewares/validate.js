@@ -1,0 +1,20 @@
+function validate(schema) {
+  return (req, res, next) => {
+    console.log("******************************************************");
+    console.log("req body:", req.body);
+    const result = schema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        message: "Validation error",
+        errors: result.error.flatten().fieldErrors,
+      });
+    }
+
+    req.validatedData = result.data;
+
+    next();
+  };
+}
+
+module.exports = { validate };

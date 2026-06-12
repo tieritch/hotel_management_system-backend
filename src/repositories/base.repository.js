@@ -16,6 +16,12 @@ function modelRepository(model) {
         where: { id },
       });
     },
+
+    async create(data) {
+      return model.create({
+        data,
+      });
+    },
   };
 }
 

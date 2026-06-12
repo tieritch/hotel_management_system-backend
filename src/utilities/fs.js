@@ -24,7 +24,11 @@ const readDir = (dir) => {
   for (const file of files) {
     const path = require("path");
     const filePath = path.join(dir, `/${file}`);
+    console.log(`file path ${filePath}`);
     let exportFromModule = require(filePath);
+    console.log(
+      `exports from module ${file}: ${JSON.stringify(exportFromModule)}`
+    );
     const distructExport = { ...exportFromModule };
     const key = Object.keys(distructExport);
     if (key.length) exports[key] = distructExport[key];
