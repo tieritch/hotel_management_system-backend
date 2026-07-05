@@ -7,113 +7,123 @@ generator client {
 }
 
 
-model USERS {
+model User {
   id                String       @id @default(uuid())
   username          String       @unique
   password_hash     String
   created_at        DateTime     @default(now())
   is_active         Boolean      @default(false)
   updated_at        DateTime     @updatedAt
-  bookings_created  BOOKINGS[]   @relation("BookingCreatedBy")
-  bookings_updated  BOOKINGS[]   @relation("BookingUpdatedBy")
-  customers_created CUSTOMERS[]  @relation("CustomerCreatedBy")
-  customers_updated CUSTOMERS[]  @relation("CustomerUpdatedBy")
-  employee          EMPLOYEES?
-  stays_created     STAYS[]      @relation("StayCreatedBy")
-  stays_updated     STAYS[]      @relation("StayUpdatedBy")
-  user_roles        USER_ROLES[]
+  bookingsCreated  Booking[]   @relation("BookingCreatedBy")
+  bookingsUpdated  Booking[]   @relation("BookingUpdatedBy")
+  customersCreated Customer[]  @relation("CustomerCreatedBy")
+  customersUpdated Customer[]  @relation("CustomerUpdatedBy")
+  employee          Employee?
+  staysCreated     Stay[]      @relation("StayCreatedBy")
+  staysUpdated     Stay[]      @relation("StayUpdatedBy")
+  userRoles        UserRole[]
+   @@map("users")
+ 
 }
 
-model ROLES {
+model Role{
   id               String             @id @default(uuid())
   name        String             @unique
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
-  role_permissions ROLE_PERMISSIONS[]
-  user_roles       USER_ROLES[]
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+   @@map("roles")
 }
 
-model USER_ROLES {
+model UserRole {
   user_id     String
   role_id     String
   assigned_at DateTime  @default(now())
   revoked_at  DateTime?
-  role        ROLES     @relation(fields: [role_id], references: [id])
-  user        USERS     @relation(fields: [user_id], references: [id])
-
+  role        Role     @relation(fields: [role_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
   @@id([user_id, role_id])
+   @@map("user_roles")
 }
 
-model RESOURCES {
-  id            String        @id @default(uuid())
+model Resource {
+  id            Int        @id @default(autoincrement())
   name String        @unique
-  permissions   PERMISSIONS[]
+  permissions   Permission[]
+   @@map("resources")
 }
 
-model ACTIONS {
-  id          String        @id @default(uuid())
+model Action {
+  id          Int        @id @default(autoincrement())
   name String        @unique
-  permissions PERMISSIONS[]
+  permissions Permission[]
+   @@map("actions")
 }
 
-model PERMISSIONS {
+model Permission {
   id               String             @id @default(uuid())
-  action_id        String
-  resource_id      String
-  action           ACTIONS            @relation(fields: [action_id], references: [id])
-  resource         RESOURCES          @relation(fields: [resource_id], references: [id])
-  role_permissions ROLE_PERMISSIONS[]
+  action_id        Int
+  resource_id      Int
+  action           Action            @relation(fields: [action_id], references: [id])
+  resource         Resource          @relation(fields: [resource_id], references: [id])
+  rolePermission RolePermission[]
 
   @@unique([resource_id, action_id])
+   @@map("permissions")
 }
 
-model ROLE_PERMISSIONS {
+model RolePermission {
   role_id       String
   permission_id String
-  permission    PERMISSIONS @relation(fields: [permission_id], references: [id])
-  role          ROLES       @relation(fields: [role_id], references: [id])
+  permission    Permission @relation(fields: [permission_id], references: [id])
+  role          Role      @relation(fields: [role_id], references: [id])
 
   @@id([role_id, permission_id])
+  @@map("role_permissions")
 }
 
-model POSITIONS {
-  id            String      @id @default(uuid())
+model Position {
+  id            Int      @id @default(autoincrement())
   name String      @unique
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
-  employees     EMPLOYEES[]
+  employees     Employee[]
+  @@map("positions")
 }
 
-model EMPLOYEES {
+model Employee {
   id             String               @id @default(uuid())
   first_name     String
   last_name      String
   email          String               @unique
   created_at     DateTime             @default(now())
   hire_date      DateTime?
-  phone_num      String?
-  position_id    String
+  phone_number      String?
+  position_id    Int
   updated_at     DateTime             @updatedAt
   user_id        String?              @unique
-  position       POSITIONS            @relation(fields: [position_id], references: [id])
-  user           USERS?               @relation(fields: [user_id], references: [id])
-  schedules      EMPLOYEE_SCHEDULES[]
-  room_cleanings ROOM_CLEANINGS[]
+  position       Position            @relation(fields: [position_id], references: [id])
+  user           User?               @relation(fields: [user_id], references: [id])
+  schedules      EmployeeSchedule[]
+  roomCleanings RoomCleaning[]
 
   @@index([position_id])
+  @@map("employees")
 }
 
-model EMPLOYEE_SCHEDULES {
+model EmployeeSchedule {
   id          String    @id @default(uuid())
   employee_id String
   start_time  DateTime
   end_time    DateTime
-  employee    EMPLOYEES @relation(fields: [employee_id], references: [id])
+  employee    Employee @relation(fields: [employee_id], references: [id])
 
   @@index([employee_id])
+  @@map("employee_schedules")
 }
 
-model CUSTOMERS {
+model Customer {
   id         String     @id @default(uuid())
   first_name String
   last_name  String
@@ -123,16 +133,17 @@ model CUSTOMERS {
   phone_num  String?
   updated_at DateTime   @updatedAt
   updated_by String?
-  bookings   BOOKINGS[]
-  creator    USERS?     @relation("CustomerCreatedBy", fields: [created_by], references: [id])
-  updater    USERS?     @relation("CustomerUpdatedBy", fields: [updated_by], references: [id])
-  orders     ORDERS[]
-  stays      STAYS[]
+  bookings   Booking[]
+  creator    User?     @relation("CustomerCreatedBy", fields: [created_by], references: [id])
+  updater    User?     @relation("CustomerUpdatedBy", fields: [updated_by], references: [id])
+  orders     Order[]
+  stays      Stay[]
 
   @@index([email])
+  @@map("customers")
 }
 
-model BOOKINGS {
+model Booking {
   id                 String    @id @default(uuid())
   customer_id        String
   created_at         DateTime  @default(now())
@@ -144,44 +155,47 @@ model BOOKINGS {
   status             String
   updated_at         DateTime  @updatedAt
   updated_by         String?
-  creator            USERS?    @relation("BookingCreatedBy", fields: [created_by], references: [id])
-  customer           CUSTOMERS @relation(fields: [customer_id], references: [id])
-  room               ROOMS     @relation(fields: [room_id], references: [id])
-  updater            USERS?    @relation("BookingUpdatedBy", fields: [updated_by], references: [id])
-  stay               STAYS?
+  creator            User?    @relation("BookingCreatedBy", fields: [created_by], references: [id])
+  customer           Customer @relation(fields: [customer_id], references: [id])
+  room               Room     @relation(fields: [room_id], references: [id])
+  updater            User?    @relation("BookingUpdatedBy", fields: [updated_by], references: [id])
+  stay               Stay?
 
   @@index([customer_id])
   @@index([room_id])
   @@index([status])
+  @@map("bookings")
 }
 
-model ROOM_TYPES {
-  id          String   @id @default(uuid())
+model RoomType {
+  id          Int   @id @default(autoincrement())
   name   String   @unique
   base_price  Decimal  @db.Decimal(12, 2)
   created_at  DateTime @default(now())
   description String?
   updated_at  DateTime @updatedAt
-  rooms       ROOMS[]
+  rooms       Room[]
+  @@map("room_types")
 }
 
-model ROOMS {
+model Room {
   id             String           @id @default(uuid())
-  room_type_id   String
+  room_type_id   Int
   room_num       String           @unique
   created_at     DateTime         @default(now())
   status         String
   updated_at     DateTime         @updatedAt
-  bookings       BOOKINGS[]
-  room_type      ROOM_TYPES       @relation(fields: [room_type_id], references: [id])
-  room_cleanings ROOM_CLEANINGS[]
-  stays          STAYS[]
+  bookings       Booking[]
+  room_type      RoomType       @relation(fields: [room_type_id], references: [id])
+  roomCleanings RoomCleaning[]
+  stays          Stay[]
 
   @@index([room_type_id])
   @@index([status])
+  @@map("rooms")
 }
 
-model STAYS {
+model Stay {
   id          String     @id @default(uuid())
   booking_id  String     @unique
   customer_id String
@@ -192,89 +206,98 @@ model STAYS {
   room_id     String
   updated_at  DateTime   @updatedAt
   updated_by  String?
-  invoices    INVOICES[]
-  booking     BOOKINGS   @relation(fields: [booking_id], references: [id])
-  creator     USERS?     @relation("StayCreatedBy", fields: [created_by], references: [id])
-  customer    CUSTOMERS  @relation(fields: [customer_id], references: [id])
-  room        ROOMS      @relation(fields: [room_id], references: [id])
-  updater     USERS?     @relation("StayUpdatedBy", fields: [updated_by], references: [id])
+  invoices    Invoice[]
+  booking     Booking   @relation(fields: [booking_id], references: [id])
+  creator     User?     @relation("StayCreatedBy", fields: [created_by], references: [id])
+  customer    Customer  @relation(fields: [customer_id], references: [id])
+  room        Room      @relation(fields: [room_id], references: [id])
+  updater     User?     @relation("StayUpdatedBy", fields: [updated_by], references: [id])
 
   @@index([customer_id])
   @@index([room_id])
+  @@map("stays")
 }
 
-model ROOM_CLEANINGS {
+model RoomCleaning {
   id          String    @id @default(uuid())
   room_id     String
   employee_id String
   cleaned_at  DateTime  @default(now())
   notes       String?
-  employee    EMPLOYEES @relation(fields: [employee_id], references: [id])
-  room        ROOMS     @relation(fields: [room_id], references: [id])
+  employee    Employee @relation(fields: [employee_id], references: [id])
+  room        Room     @relation(fields: [room_id], references: [id])
 
   @@index([room_id])
   @@index([employee_id])
+  @@map("room_cleanings")
 }
 
-model MENU_ITEMS {
+model MenuItem {
   id           String        @id @default(uuid())
   name    String
   created_at   DateTime      @default(now())
   is_available Boolean       @default(true)
   price        Decimal       @db.Decimal(12, 2)
   updated_at   DateTime      @updatedAt
-  order_items  ORDER_ITEMS[]
+  orderItems  OrderItem[]
+  @@map("menu_items")
 }
 
-model ORDERS {
+model Order {
   id           String        @id @default(uuid())
   customer_id  String
   order_date   DateTime      @default(now())
   status       String
   total_amount Decimal       @db.Decimal(12, 2)
-  customer     CUSTOMERS     @relation(fields: [customer_id], references: [id])
-  order_items  ORDER_ITEMS[]
+  customer     Customer     @relation(fields: [customer_id], references: [id])
+  orderItems  OrderItem[]
+  @@map("orders")
 }
 
-model ORDER_ITEMS {
+model OrderItem {
   id           String     @id @default(uuid())
   order_id     String
   menu_item_id String
   quantity     Int
   unit_price   Decimal    @db.Decimal(12, 2)
-  menu_item    MENU_ITEMS @relation(fields: [menu_item_id], references: [id])
-  order        ORDERS     @relation(fields: [order_id], references: [id])
+  menu_item    MenuItem @relation(fields: [menu_item_id], references: [id])
+  order        Order     @relation(fields: [order_id], references: [id])
   measuring_unit_id Int 
-  measuring_unit MEASURING_UNITS @relation(fields:[measuring_unit_id], references:[id])
+  measuring_unit MeasuringUnit @relation(fields:[measuring_unit_id], references:[id])
 
   @@index([order_id])
   @@index([menu_item_id])
+  @@map("order_items")
 }
 
-model INVOICES {
+model Invoice {
   id           String         @id @default(uuid())
   stay_id      String
   total_amount Decimal        @db.Decimal(12, 2)
   invoice_date DateTime       @default(now())
-  stay         STAYS          @relation(fields: [stay_id], references: [id])
-  transactions TRANSACTIONS[]
+  stay         Stay          @relation(fields: [stay_id], references: [id])
+  transactions Transaction[]
 
   @@index([stay_id])
+  @@map("invoices")
+
 }
 
-model TRANSACTIONS {
+model Transaction {
   id             String   @id @default(uuid())
   invoice_id     String
   amount         Decimal  @db.Decimal(12, 2)
   payment_method String
   payment_date   DateTime @default(now())
-  invoice        INVOICES @relation(fields: [invoice_id], references: [id])
+  invoice        Invoice @relation(fields: [invoice_id], references: [id])
 
   @@index([invoice_id])
+  @@map("transactions")
 }
 
-model MEASURING_UNITS {
+model MeasuringUnit {
   id   Int @id @default(autoincrement())
   name String  @unique
-  order_items  ORDER_ITEMS[]
+  orderItems  OrderItem[]
+  @@map("measuring_units")
  }

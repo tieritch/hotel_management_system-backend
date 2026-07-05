@@ -1,0 +1,87 @@
+@baseUrl = http://localhost:8000
+
+### Find all users
+GET {{baseUrl}}/api/users/?include=roles
+
+###
+
+### Find user by id
+GET {{baseUrl}}/api/users/9993e22e-1887-483f-8bae-acf90e3427e2?include=roles
+###
+
+### Find user by query with icnlude
+GET {{baseUrl}}/api/users?username=jean1&include=roles
+###
+
+### Create user
+POST {{baseUrl}}/api/users/
+Content-Type: application/json
+
+{
+"username": "john4",
+"password": "Passord123",
+
+
+}
+###
+
+
+### assign user with roles
+
+POST {{baseUrl}}/api/users/9993e22e-1887-483f-8bae-acf90e3427e2/roles
+Content-Type: application/json
+
+{
+//"id": "jeanne",
+"roleIds": [
+"515cd2e0-5476-4676-b5f1-6289048c7620",
+"2bea3aa7-59c6-41f7-a492-51bd1803a6a1"]
+
+}
+###
+
+### update user roles
+
+Patch {{baseUrl}}/api/users/4999e062-fe8d-4b40-a1e0-4c4d396cfa8f/roles
+Content-Type: application/json
+
+{
+//"id": "jeanne",
+"roleIds": [
+"3e42aa05-f4b2-4329-b711-64e51333d8a9",
+"7ca9f8f8-05fc-4eb4-b60a-905b1b10b5e5"]
+
+}
+###
+
+
+Patch {{baseUrl}}/api/users/bb5a906f-a954-4a16-9bc8-c622f2f26582/isActive
+Content-Type: application/json
+
+{
+ "isActive": true
+
+}
+###
+
+
+
+DELETE {{baseUrl}}/api/users/61047373-2cd3-4399-bcb4-a3fd88ced50611
+
+
+### login user
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+"username": "admin",
+"password": "admin@123456"
+
+}
+###
+
+### logout user
+POST {{baseUrl}}/api/users/logout
+Content-Type: application/json
+
+###

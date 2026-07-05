@@ -6,7 +6,7 @@ dotenv.config();
 
 module.exports = defineConfig({
   migrations: {
-    seed: "node prisma/seed.js",
+    seed: "node src/prisma/seed.js",
   },
   datasource: {
     url: process.env.DATABASE_URL,

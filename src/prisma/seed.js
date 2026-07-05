@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const prisma = require("../prismaClient");
+const prisma = require("../../prismaClient");
 
 async function main() {
   console.log("Début du seeding...");
@@ -8,10 +8,10 @@ async function main() {
   // ACTIONS
   // ==================================================
 
-  const actions = ["CREATE", "READ", "UPDATE", "DELETE"];
+  const actions = ["create", "read", "update", "delete"];
 
   for (const action of actions) {
-    await prisma.ACTIONS.upsert({
+    await prisma.action.upsert({
       where: {
         name: action,
       },
@@ -26,10 +26,10 @@ async function main() {
   // ROLES
   // ==================================================
 
-  const roles = ["ADMIN", "MANAGER", "RECEPTIONIST"];
+  const roles = ["admin", "manager", "receptionist"];
 
   for (const role of roles) {
-    await prisma.ROLES.upsert({
+    await prisma.role.upsert({
       where: {
         name: role,
       },
@@ -45,15 +45,15 @@ async function main() {
   // ==================================================
 
   const positions = [
-    "Manager",
-    "Receptionist",
-    "Housekeeper",
-    "Maintenance",
-    "Restaurant Staff",
+    "manager",
+    "receptionist",
+    "housekeeper",
+    "maintenance",
+    "restaurant Staff",
   ];
 
   for (const position of positions) {
-    await prisma.POSITIONS.upsert({
+    await prisma.position.upsert({
       where: {
         name: position,
       },
@@ -70,24 +70,24 @@ async function main() {
 
   const roomTypes = [
     {
-      name: "Standard",
-      description: "Standard room",
+      name: "standard",
+      description: "standard room",
       base_price: 50,
     },
     {
-      name: "Deluxe",
-      description: "Deluxe room",
+      name: "deluxe",
+      description: "deluxe room",
       base_price: 100,
     },
     {
-      name: "Suite",
-      description: "Suite room",
+      name: "duite",
+      description: "suite room",
       base_price: 200,
     },
   ];
 
   for (const roomType of roomTypes) {
-    await prisma.ROOM_TYPES.upsert({
+    await prisma.roomType.upsert({
       where: {
         name: roomType.name,
       },
@@ -101,24 +101,24 @@ async function main() {
   // ==================================================
 
   const resources = [
-    "USERS",
-    "ROLES",
-    "EMPLOYEES",
-    "CUSTOMERS",
-    "BOOKINGS",
-    "ROOMS",
-    "ROOM_TYPES",
-    "STAYS",
-    "INVOICES",
-    "TRANSACTIONS",
-    "ORDERS",
-    "MENU_ITEMS",
-    "ROOM_CLEANINGS",
-    "EMPLOYEE_SCHEDULES",
+    "users",
+    "roles",
+    "employees",
+    "customers",
+    "bookings",
+    "rooms",
+    "room_types",
+    "stays",
+    "invoices",
+    "transactions",
+    "orders",
+    "menu_items",
+    "room_cleanings",
+    "employee_schedules",
   ];
 
   for (const resource of resources) {
-    await prisma.RESOURCES.upsert({
+    await prisma.resource.upsert({
       where: {
         name: resource,
       },
@@ -133,12 +133,12 @@ async function main() {
   // PERMISSIONS
   // ==================================================
 
-  const dbResources = await prisma.RESOURCES.findMany();
-  const dbActions = await prisma.ACTIONS.findMany();
+  const dbResources = await prisma.resource.findMany();
+  const dbActions = await prisma.action.findMany();
 
   for (const resource of dbResources) {
     for (const action of dbActions) {
-      await prisma.PERMISSIONS.upsert({
+      await prisma.permission.upsert({
         where: {
           resource_id_action_id: {
             resource_id: resource.id,
@@ -158,16 +158,16 @@ async function main() {
   // ADMIN ROLE PERMISSIONS
   // ==================================================
 
-  const adminRole = await prisma.ROLES.findUnique({
+  const adminRole = await prisma.role.findUnique({
     where: {
-      name: "ADMIN",
+      name: "admin",
     },
   });
 
-  const permissions = await prisma.PERMISSIONS.findMany();
+  const permissions = await prisma.permission.findMany();
 
   for (const permission of permissions) {
-    const existing = await prisma.ROLE_PERMISSIONS.findUnique({
+    const existing = await prisma.rolePermission.findUnique({
       where: {
         role_id_permission_id: {
           role_id: adminRole.id,
@@ -177,7 +177,7 @@ async function main() {
     });
 
     if (!existing) {
-      await prisma.ROLE_PERMISSIONS.create({
+      await prisma.rolePermission.create({
         data: {
           role_id: adminRole.id,
           permission_id: permission.id,
@@ -190,19 +190,20 @@ async function main() {
   // ADMIN USER
   // ==================================================
 
-  const passwordHash = await bcrypt.hash("Admin@123456", 10);
+  const passwordHash = await bcrypt.hash("admin@123456", 10);
 
-  let adminUser = await prisma.USERS.findUnique({
+  let adminUser = await prisma.user.findUnique({
     where: {
       username: "admin",
     },
   });
 
   if (!adminUser) {
-    adminUser = await prisma.USERS.create({
+    adminUser = await prisma.user.create({
       data: {
         username: "admin",
         password_hash: passwordHash,
+        is_active: true,
       },
     });
 
@@ -213,23 +214,23 @@ async function main() {
   // ADMIN EMPLOYEE
   // ==================================================
 
-  const managerPosition = await prisma.POSITIONS.findUnique({
+  const managerPosition = await prisma.position.findUnique({
     where: {
-      name: "Manager",
+      name: "manager",
     },
   });
 
-  let employee = await prisma.EMPLOYEES.findUnique({
+  let employee = await prisma.employee.findUnique({
     where: {
       email: "admin@hotel.local",
     },
   });
 
   if (!employee) {
-    employee = await prisma.EMPLOYEES.create({
+    employee = await prisma.employee.create({
       data: {
-        first_name: "System",
-        last_name: "Administrator",
+        first_name: "system",
+        last_name: "administrator",
         email: "admin@hotel.local",
         position_id: managerPosition.id,
       },
@@ -252,7 +253,7 @@ async function main() {
 
     if (!existingUserRole) {*/
 
-  await prisma.USER_ROLES.upsert({
+  await prisma.userRole.upsert({
     where: {
       user_id_role_id: {
         user_id: adminUser.id,

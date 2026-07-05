@@ -1,3 +1,7 @@
-const userController = require("./user.controller");
+/*const userController = require("./user.controller");
 
-module.exports = { userController };
+module.exports = { userController };*/
+
+const readDir = require("../utilities/fs");
+const controllers = readDir(__dirname);
+module.exports = controllers;

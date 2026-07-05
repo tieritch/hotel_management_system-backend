@@ -1,37 +1,42 @@
 ///const prisma = require("../prismaClient");
 const bcrypt = require("bcrypt");
-const { userRepository } = require("../repositories");
+const jwt = require("jsonwebtoken");
+const prisma = require("../../prismaClient");
+
+const { userRepository, userRoleRepository } = require("../repositories");
+const { errorMsg, handleDBError } = require("../utilities");
+const { toggleStatus } = require("../zod-validators/user.validator");
+
 const userController = {
   async findAll(req, res) {
     try {
-      const users = await userRepository.findAll();
+      const { include, ...filters } = req.query;
+
+      let users = await userRepository.findAll(filters, include);
+      //  const { password_hash, ...otherUserKeys } = filters;
+      users = users
+        .filter((user) => user.username.toLowerCase().trim() !== "admin")
+        .map(({ password_hash, ...otherUserKeys }) => ({ ...otherUserKeys }));
+
       res.status(200).json(users);
     } catch (err) {
       console.error(err);
-
-      return res.status(500).json({
-        category: "Internal server error",
-        message: err.message,
-      });
-    }
-  },
-
-  async findBy(req, res) {
-    try {
-      const user = await userRepository.findBy(req.query);
-      res.status(200).json(user);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({
-        category: "Internal server error",
-        message: err.message,
-      });
+      handleDBError(err, res, "User");
     }
   },
 
   async findById(req, res) {
     try {
-      const user = await userRepository.findById(req.params.id);
+      const { include } = req.query;
+      const { id } = req.params;
+      console.log("req query:", req.query);
+      let user = await userRepository.findById(id, include);
+      /*if (user) {
+        const { id, username, is_active, created_at, updated_at } = user;
+        user = { id, username, is_active, created_at, updated_at };
+      }*/
+      const { password_hash, ...otherUserKeys } = user;
+      user = otherUserKeys;
       res.status(200).json(user);
     } catch (err) {
       console.error(err);
@@ -39,49 +44,178 @@ const userController = {
         category: "Internal server error",
         message: err.message,
       });
-    }
-  },
-
-  async findByUsername(req, res) {
-    try {
-      const user = await userRepository.findByUsername(req.body.username);
-      res.status(200).json(user);
-    } catch (err) {
-      console.error(err);
     }
   },
 
   async create(req, res) {
     try {
-      const { username, password } = req.validatedData;
+      let { username, password } = req.validatedData.body;
 
-      const existingUser = await userRepository.findByUsername(
-        username.trim().toLowerCase()
-      );
+      password = await bcrypt.hash(password, 10);
 
-      if (existingUser) {
-        return res.status(409).json({
-          category: "Conflict",
-          message: "Username already exists",
-        });
-      }
-
-      const password_hash = await bcrypt.hash(password, 10);
-
-      const user = await userRepository.create({
+      let user = await userRepository.create({
         username: username.trim().toLowerCase(),
-        password_hash,
+        password_hash: password,
       });
 
+      const { password_hash, ...otherUserKeys } = user;
+      user = otherUserKeys;
       return res.status(201).json(user);
     } catch (err) {
       console.error(err);
 
-      return res.status(500).json({
-        category: "Internal server error",
-        message: err.message,
+      handleDBError(err, res, "User");
+    }
+  },
+
+  async assignRole(req, res) {
+    try {
+      const { id } = req.validatedData.params;
+      const { roleIds } = req.validatedData.body;
+      const data = roleIds.map((role) => ({
+        user_id: id,
+        role_id: role, //.roleId,
+      }));
+
+      const count = await userRoleRepository.createMany(data);
+
+      return res.status(201).json({
+        success: true,
+        message: "Role assigned successfully.",
+        data: count,
       });
+    } catch (err) {
+      console.error(err);
+      handleDBError(err, res, "UserRole");
+    }
+  },
+
+  async updateRole(req, res) {
+    try {
+      const { id } = req.validatedData.params;
+      const { roleIds } = req.validatedData.body;
+      const data = roleIds.map((role) => ({
+        user_id: id,
+        role_id: role, //.roleId,
+      }));
+
+      const count = await prisma.$transaction(async (tx) => {
+        await tx.UserRole.deleteMany({ where: { user_id: id } });
+        return tx.UserRole.createMany({ data });
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "user roles updated successfully.",
+        data: count,
+      });
+    } catch (err) {
+      handleDBError(err, res, "UserRole");
+    }
+  },
+
+  async remove(req, res) {
+    try {
+      //  const user = req.user;
+      const { id } = req.validatedData.params;
+      const deleted = await userRepository.removeById(req.params.id);
+      return res.status(201).json({
+        success: true,
+        message: "user deleted successfully",
+        data: deleted,
+      });
+    } catch (err) {
+      console.log(err);
+      handleDBError(err, res, "User");
+    }
+  },
+
+  async login(req, res) {
+    try {
+      const { username, password } = req.validatedData.body;
+      //await bcrypt.compareSync()
+      let user = await userRepository.findByUsername(username);
+      if (user) {
+        const comp = await bcrypt.compare(password, user.password_hash);
+        //bcrypt.compare()
+        if (!comp) {
+          res.status(404).json({
+            success: "false",
+            category: " Not Found",
+            message: " wrong password ",
+          });
+        }
+
+        const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+          expiresIn: "2h",
+        });
+        //const refreshExpires = input.rememberMe ? "7d" : "1d";
+        const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, {
+          expiresIn: "1d",
+        });
+
+        const isProduction = process.env.NODE_ENV == "production";
+        res
+          .cookie("accessToken", accessToken, {
+            httpOnly: true,
+            maxAge: 2 * 60 * 60 * 1000,
+            secure: isProduction,
+            sameSite: isProduction ? "Strict" : "Lax",
+          })
+          .cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            secure: isProduction,
+            sameSite: isProduction ? "Strict" : "Lax",
+          });
+
+        const { id, is_active, created_at, updated_at } = user;
+        user = { id, username, is_active, created_at, updated_at };
+
+        res.status(200).json(user);
+      } else {
+        res.status(404).json({
+          success: "false",
+          category: " Not Found",
+          message: " wrong username",
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      handleDBError(err, res, "User");
+    }
+  },
+
+  async logout(req, res) {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.status(200).json({
+      succes: true,
+      message: "logged out",
+      data: req.user,
+    });
+  },
+
+  async toggleStatus(req, res) {
+    try {
+      const { id } = req.validatedData.params;
+      const { isActive } = req.validatedData.body;
+      const user = await userRepository.findById(req.params.id);
+      if (user) {
+        const updated = await userRepository.updateById(
+          { is_active: isActive },
+          id
+        );
+        return res.status(201).json({
+          success: true,
+          message: "user updated successfully",
+          data: updated,
+        });
+      }
+    } catch (err) {
+      handleDBError(err, res, "User");
     }
   },
 };
-module.exports = userController;
+
+module.exports = { userController };

@@ -4,18 +4,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "set NODE_ENV = development && nodemon src",
+    "prod": "set NODE_ENV= production && node src",
     "lint": "eslint .",
     "format": "prettier --write",
     "lint:fix": "eslint . --fix",
-    "db:migrate": "prisma migrate dev --name init",
+    "db:migrate": "prisma migrate dev --name init  --schema src/prisma/schema.prisma",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
-    "db:gen": "prisma generate",
+    "db:gen": "prisma generate  --schema src/prisma/schema.prisma",
     "db:setup": "prisma migrate dev && prisma db seed"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",

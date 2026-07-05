@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:8000
+
+### Find all permissions
+GET {{baseUrl}}/api/permissions
+
+###
+
+### Find user by id
+GET {{baseUrl}}/api/permissions/65f4f58c-642b-40a3-8200-3f68e0e21ddc
+###
+
+### Create user
+POST {{baseUrl}}/api/permissions
+Content-Type: application/json
+
+[{
+"resourceId": "8ba56793-d9f7-4147-a58d-1685d530bcc4",
+"actionId": "c01da2c8-be0f-4479-bf4f-0d83d79935b9"
+},
+{
+"resourceId": "cc9318a0-2a80-499b-a250-02b3ded051c2aaaaaaaaaa",
+"actionId":  "c01da2c8-be0f-4479-bf4f-0d83d79935b91"
+}
+]
+###

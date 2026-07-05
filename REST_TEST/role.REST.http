@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:8000
+
+### Find all roles
+GET {{baseUrl}}/api/roles
+
+###
+
+### Find role by id
+GET {{baseUrl}}/api/roles/d8d4c00b-4e20-4bba-8fac-6d6249149097
+###
+
+### Find role by query
+GET {{baseUrl}}/api/roles?name=admin
+###
+###
+GET {{baseUrl}}/api/actions
+####
+
+###
+GET {{baseUrl}}/api/resources
+####
+
+### Create role
+
+POST {{baseUrl}}/api/roles/
+Content-Type: application/json
+
+{
+"name": "receptionner7", 
+"permissions":[
+{"actionId":"342c7989-6aa7-43e7-b7d4-6cf5482d21df",
+"resourceId":"52bd8e30-8822-4945-b015-05b7a755c88e"
+},
+{"actionId":"c1a287eb-11d6-4249-8f36-c6d5f557a77c",
+"resourceId":"52bd8e30-8822-4945-b015-05b7a755c88e"
+}
+]
+}
+###
+
+### Remove a role
+DELETE {{baseUrl}}/api/roles/9b9b740b-ecd6-4990-989e-c36361d58633
+####
+
+### Modify role
+
+PATCH   {{baseUrl}}/api/roles/efc58fba-4b4a-4124-815c-ad594029cbcd
+Content-Type: application/json
+
+{
+"name": "receiver000", 
+"permissions":[
+ {"actionId":"4bb8b59d-cc30-42d8-aab0-51c306da889fdd",
+  "resourceId":"a48615e6-9dac-4a54-9cd9-9b1e2ae56937"
+  } ,
+
+   {"actionId":"b9a69745-ac95-471a-9fa5-9ba263a27d57",
+  "resourceId":"a48615e6-9dac-4a54-9cd9-9b1e2ae56937"
+  } ,
+   {"actionId":"4bb8b59d-cc30-42d8-aab0-51c306da889f",
+  "resourceId":"a48615e6-9dac-4a54-9cd9-9b1e2ae56937"
+  } 
+]
+}

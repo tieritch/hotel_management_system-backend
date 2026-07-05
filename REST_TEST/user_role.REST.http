@@ -1,0 +1,11 @@
+@baseUrl = http://localhost:8000
+
+### Find all user and their roles
+GET {{baseUrl}}/api/user_roles
+
+###
+
+### Find user by id
+GET {{baseUrl}}/api/user_roles/search?id=12026719-e76a-4c3e-be8a-027c746eeb0e
+###
+

@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:8000
+
+### Find all employees
+GET {{baseUrl}}/api/employees
+
+###
+
+### Find an employee by id
+GET {{baseUrl}}/api/employees/74504988-12a5-496f-bde8-cdd283e27438
+###
+
+### Create an employee
+POST {{baseUrl}}/api/employees/
+Content-Type: application/json
+
+{
+"email": "luc1@gmail.com",
+"firstname":"luc",
+"lastname":"Emery2",
+"hireDate":"12/25/2024",
+"phoneNumber":"+257 68 542 123",
+"positionId": "2"
+ 
+}
+###
+
+### Remove a user 
+DELETE {{baseUrl}}/api/employees/00b78e69-099c-4756-9632-c423742fe892
+###
+
+### Updatean employee
+PATCH {{baseUrl}}/api/employees/37fbcc8d-11d4-4a75-8ea7-ddf56463fcc7
+Content-Type: application/json
+
+{
+"email": "john1@gmail.com",
+"firstname":"John2",
+"lastname":"Emery2",
+"hireDate":"12/18/2024",
+"phoneNumber":"+257 68 542 123",
+"positionId":2
+}
+###
+
+

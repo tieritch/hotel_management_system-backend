@@ -1,92 +1,109 @@
 const jwt = require("jsonwebtoken");
 
-/*const auth = (req, res, next) => {
-  const accessToken = req.cookies.accessToken;
-  const secret = process.env.ACCESS_TOKEN_SECRET;
-  if (!accessToken) {
-    return res.status(401).json({ error: "unauthorized" });
-  }
-  try {
-    const decoded = jwt.verify(accessToken, secret);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: "token invalid or expired" });
-  }
-};*/
+const { handleDBError } = require("../utilities");
 
-let auth = (req, res, next) => {
-  // 1. Récupération du jeton (nécessite le middleware 'cookie-parser' dans index.js)
+const { userRepository } = require("../repositories");
+
+const prisma = require("../../prismaClient");
+
+const errorNotif = {
+  success: "false",
+  category: "Authorization",
+};
+
+const checkToken = (req, res, next) => {
   const accessToken = req.cookies?.accessToken;
   const secret = process.env.ACCESS_TOKEN_SECRET;
 
-  // Sécurité préventive : si la clé secrète est absente du fichier .env
   if (!secret) {
-    console.error(
-      "CRITICAL: ACCESS_TOKEN_SECRET is not defined in env variables."
-    );
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({
+      ...errorNotif,
+      message: "ACCESS_TOKEN_SECRET is not defined in env variables.",
+    });
   }
 
-  // 2. Vérification de la présence du cookie
   if (!accessToken) {
-    return res.status(401).json({ error: "Unauthorized: No cookie provided" });
+    return res.status(401).json({
+      ...errorNotif,
+      message: "Unauthorized: No token provided",
+    });
   }
 
   try {
-    // 3. Validation et décodage du JWT
     const decoded = jwt.verify(accessToken, secret);
-
-    // 4. Transmission des infos au cycle de vie de la requête
     req.user = decoded;
 
-    // 5. Passage au middleware/contrôleur suivant
     next();
   } catch (err) {
-    // Statut 403 (Forbidden) : Le client a un jeton, mais il n'est plus valide/expiré
-    return res
-      .status(403)
-      .json({ error: "Forbidden: Token invalid or expired" });
+    return res.status(403).json({
+      ...errorNotif,
+      message: "Token invalid or expired",
+    });
   }
 };
 
-/*const auth1 = (req, res, next) => {
-  // 1. Récupération du jeton (nécessite le middleware 'cookie-parser' dans index.js)
-  const accessToken = req.cookies?.accessToken;
-  const secret = process.env.ACCESS_TOKEN_SECRET;
+const checkIsAdmin = async (req, res, next) => {
+  if (!req.user)
+    return res.status(401).json({
+      ...errorNotif,
+      message: "User identity unknown",
+    });
 
-  // Sécurité préventive : si la clé secrète est absente du fichier .env
-  if (!secret) {
-    console.error(
-      "CRITICAL: ACCESS_TOKEN_SECRET is not defined in env variables."
-    );
-    return res.status(500).json({ error: "Internal server error" });
-  }
-
-  // 2. Vérification de la présence du cookie
-  if (!accessToken) {
-    return res.status(401).json({ error: "Unauthorized: No cookie provided" });
-  }
+  const username = req.user.username;
 
   try {
-    // 3. Validation et décodage du JWT
-    const decoded = jwt.verify(accessToken, secret);
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: { userRoles: { include: { role: true } } },
+    });
 
-    // 4. Transmission des infos au cycle de vie de la requête
-    req.user = decoded;
+    const roles = user.userRoles.map((ur) => ur.role.name);
 
-    // 5. Passage au middleware/contrôleur suivant
+    if (!user) {
+      return res.status(401).json({ error: "User not found " });
+    }
+
+    if (!roles.find((role) => role.toLowerCase().trim() === "admin"))
+      return res.status(403).json({
+        ...errorNotif,
+        message: "Admin role required for this resource",
+      });
+
     next();
   } catch (err) {
-    // Statut 403 (Forbidden) : Le client a un jeton, mais il n'est plus valide/expiré
-    return res
-      .status(403)
-      .json({ error: "Forbidden: Token invalid or expired" });
+    handleDBError(err, res, "users");
   }
-};*/
-
-const auth1 = {
-  naming() {},
 };
 
-module.exports = { auth };
+const checkIsActive = async (req, res, next) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      ...errorNotif,
+      message: "User identity unknown.",
+    });
+  }
+
+  const user = await userRepository.findByUsername(req.user.username);
+  if (!user) {
+    return res.status(404).json({ error: "User not found " });
+  }
+
+  if (!user.is_active)
+    return res.status(403).json({
+      ...errorNotif,
+      message: "Your account is not activated or has been suspended.",
+    });
+
+  next();
+};
+
+const requireActiveUser = [checkToken, checkIsActive];
+const requireAdmin = [checkToken, checkIsActive, checkIsAdmin];
+
+module.exports = {
+  checkToken,
+  checkIsAdmin,
+  checkIsActive,
+  requireActiveUser,
+  requireAdmin,
+};
