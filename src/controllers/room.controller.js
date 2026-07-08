@@ -1,8 +1,5 @@
-const { roomStatus } = require("../../prismaClient");
 const { roomRepository } = require("../repositories");
 const { handleDBError, mapZodToDb } = require("../utilities");
-const { update } = require("../zod-validators/role.validator");
-const { create } = require("../zod-validators/user.validator");
 
 const roomController = {
   async findAll(req, res) {

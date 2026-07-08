@@ -301,6 +301,25 @@ async function main() {
     });
   }
 
+  const measuringUnits = [
+    { name: "pc", description: "piece" },
+    { name: "kg", description: "kilogramme" },
+    { name: "g", description: "gramme" },
+    { name: "bt", description: "bottle" },
+    { name: "l", description: "liter" },
+    { name: "box", description: "box" }, // Pour les livraisons et packs de stock (ex: carton de 50 canettes)
+    { name: "pack", description: "pack" },
+  ];
+
+  for (const unit of measuringUnits) {
+    const formatName = unit.name.toLocaleLowerCase().trim();
+    const formatDesc = unit.description.toLocaleLowerCase().trim();
+    await prisma.measuringUnit.upsert({
+      where: { name: formatName },
+      update: {},
+      create: { name: formatName, description: formatDesc },
+    });
+  }
   console.log("Seeding terminé.");
 }
 

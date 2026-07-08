@@ -83,9 +83,9 @@ function handleDBError(err, res, modelName) {
       );
 
       if (dynamicFields.length > 0) {
-        conflictMessage = `The value '${dynamicFields.join(", ")}' is already taken by another ${modelName}`;
+        conflictMessage = `The ${dynamicFields.join(", ")} is already taken by another ${modelName}`;
       } else {
-        conflictMessage = `The value '${targetFields.join(", ")}' triggers a unique constraint conflict`;
+        conflictMessage = `The ${targetFields.join(", ")} triggers a unique constraint conflict`;
       }
     }
   }

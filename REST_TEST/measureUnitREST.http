@@ -1,0 +1,35 @@
+@baseUrl = http://localhost:8000
+### Find all measuring units
+GET {{baseUrl}}/api/measuring-units?include=orderItems
+###
+
+
+### Find  measuring units by id
+GET {{baseUrl}}/api/measuring-units/1
+###
+
+
+### Create   measuring units
+POST {{baseUrl}}/api/measuring-units
+Content-Type: application/json
+
+{
+"name": "Assi",
+"description": "Une Assiette"
+}
+###
+
+### Update   measuring units
+PATCH  {{baseUrl}}/api/measuring-units/5
+Content-Type: application/json
+
+{
+"name": "Assi",
+"description": "Une Assiete pleine"
+}
+###
+
+
+### Delete  measuring units by id
+DELETE  {{baseUrl}}/api/measuring-units/6
+###

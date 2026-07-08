@@ -36,6 +36,8 @@ app.use("/api/room-statuses", require("./routes/room-status.router"));
 
 app.use("/api/rooms", require("./routes/room.router"));
 
+app.use("/api/measuring-units", require("./routes/measuring-unit.router"));
+
 app.use("/api/actions", require("./routes/action.router"));
 
 app.use("/api/resources", require("./routes/resource.router"));
