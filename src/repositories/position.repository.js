@@ -2,7 +2,7 @@ const prisma = require("../../prismaClient");
 
 const baseModelRepository = require("./base.repository");
 
-const { buildInclude } = require("./query-builders/position.query-builder");
+const { buildInclude } = require("./query-builders/position");
 
 const positionRepository = {
   ...baseModelRepository(prisma.Position, buildInclude),

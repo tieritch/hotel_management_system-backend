@@ -5,7 +5,7 @@ const prisma = require("../../prismaClient");
 
 const { userRepository, userRoleRepository } = require("../repositories");
 const { errorMsg, handleDBError } = require("../utilities");
-const { toggleStatus } = require("../zod-validators/user.validator");
+//const { toggleStatus } = require("../zod-validators/user.validator");
 
 const userController = {
   async findAll(req, res) {

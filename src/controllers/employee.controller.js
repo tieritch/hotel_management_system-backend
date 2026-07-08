@@ -20,14 +20,14 @@
 
 const { employeeRepository } = require("../repositories");
 
-const { handleDBError } = require("../utilities");
+const { handleDBError, mapZodToDb } = require("../utilities");
 const { update } = require("../zod-validators/role.validator");
 
 const employeeController = {
   async findAll(req, res) {
-    const { include, ...filter } = req.query;
+    const { include, ...filters } = req.query;
     try {
-      const emps = await employeeRepository.findAll(filter, include);
+      const emps = await employeeRepository.findAll(filters, include);
       res.status(200).json(emps);
     } catch (err) {
       handleDBError(err, res, "Employee");
@@ -81,7 +81,7 @@ const employeeController = {
       const bodyData = req.validatedData.body;
 
       // 3. On prépare l'objet final que Prisma va recevoir
-      const updateData = {};
+      //const updateData = {};
 
       // 4. On mappe dynamiquement les noms de champs (CamelCase -> SnakeCase)
       // uniquement pour les clés qui ont été VRAIMENT fournies (différentes de undefined)
@@ -95,12 +95,12 @@ const employeeController = {
         email: "email",
       };
 
-      for (const [zodKey, dbKey] of Object.entries(fieldMapping)) {
+      /*for (const [zodKey, dbKey] of Object.entries(fieldMapping)) {
         if (bodyData[zodKey] !== undefined) {
           updateData[dbKey] = bodyData[zodKey] === "" ? null : bodyData[zodKey];
         }
-      }
-
+      }*/
+      const updateData = mapZodToDb(bodyData, fieldMapping);
       // 5. On envoie l'ID et l'objet dynamique nettoyé au repository
 
       const updated = await employeeRepository.updateById(updateData, id);

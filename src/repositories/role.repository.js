@@ -16,7 +16,7 @@ const baseModelRepository = require("./base.repository");
 
 //const { buildInclude } = require("./query-builders/role.query-builder");
 
-const { buildInclude } = require("./query-builders/role.query-builder");
+const { buildInclude } = require("./query-builders/role");
 
 const roleRepository = {
   ...baseModelRepository(prisma.Role, buildInclude),

@@ -28,7 +28,7 @@ function buildInclude(include) {
 
     //schedules
 
-    "roles.permissions": {
+    /*"roles.permissions": {
       userRoles: {
         include: {
           role: {
@@ -47,7 +47,7 @@ function buildInclude(include) {
           },
         },
       },
-    },
+    },*/
   };
 
   return includes[include];

@@ -4,113 +4,97 @@ req.validatedData;
 */
 
 const { z } = require("zod");
-const { position } = require("../../prismaClient");
 
+// 1. Schémas de base nettoyés et sécurisés contre les chaînes vides du Front
+const emailSch = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(
+    z.union([
+      z.literal("").transform(() => undefined), // Transforme "" en undefined pour la DB et le refine
+      z.email({ error: "Invalid email" }),
+    ])
+  );
+
+const firstnameSch = z
+  .string({ error: "first name must be a string" })
+  .trim()
+  .min(1, { error: "first name required" });
+
+const lastnameSch = z
+  .string({ error: "last name must be a string" })
+  .trim()
+  .min(1, { error: "last name required" });
+
+const hireDateSch = z.union([
+  z.literal("").transform(() => undefined), // Transforme "" en undefined pour éviter le crash Prisma
+  z.coerce.date({ error: "invalid date format" }),
+]);
+
+const phoneNumberSch = z
+  .string({ error: "Phone number must be a string" })
+  .min(1, { error: "Phone number required" });
+
+const positionIdSch = z.coerce
+  .number({ error: "Position Id must be a valid number" })
+  .int({ error: "Position id must be a valid integer" })
+  .positive({ error: "Position ID must be a positive integer" });
+
+const userIdSch = z.union([
+  z.literal("").transform(() => undefined), // Sécurise l'ID utilisateur optionnel
+  z
+    .string({ error: "user ID must be a string" })
+    .min(1, { error: "user ID required" }),
+]);
+
+// 2. Configurations des Schémas d'Endpoints
 const create = {
   body: z.object({
-    email: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .pipe(z.union([z.literal(""), z.email({ error: "Invalid email" })]))
-      .optional(),
-
-    firstname: z
-      .string()
-      .trim()
-      .pipe(
-        z
-          .string({ error: "first name must be a string" })
-          .min(1, "first name required")
-      ),
-    lastname: z
-      .string()
-      .trim()
-      .pipe(
-        z
-          .string({ error: "last name must be a string" })
-          .min(1, "last name required")
-      ),
-
-    hireDate: z
-      .union([z.literal(""), z.coerce.date({ error: "invalid date format" })])
-      .optional(),
-
-    phoneNumber: z
-      .string({ error: "Phone number must be a string" })
-      .min(1, "Phone number required"),
-
-    positionId: z.coerce
-      .number({ error: "Position Id must be a valid number" })
-      .int({ error: "Position id must be a valid integer" })
-      .positive({ error: "Position ID must be a positive integer" }),
-
-    userId: z
-      .union([
-        z.literal(""),
-        z
-          .string({ error: "user ID must be a string" })
-          .min(1, "user ID required"),
-      ])
-      .optional(),
+    email: emailSch.optional(),
+    firstname: firstnameSch,
+    lastname: lastnameSch,
+    hireDate: hireDateSch.optional(),
+    phoneNumber: phoneNumberSch,
+    positionId: positionIdSch,
+    userId: userIdSch.optional(),
   }),
 };
 
-let update = {
+const update = {
   params: z.object({
     id: z
       .string({ error: "Employee ID must be a string" })
-      .min(1, { message: "Employee Id required" }),
+      .min(1, { error: "Employee Id required" }),
   }),
 
   body: z
     .object({
-      email: z
-        .string()
-        .trim()
-        .toLowerCase()
-        .pipe(z.union([z.literal(""), z.email({ error: "Invalid email" })]))
-        .optional(),
+      // 1. Ces schémas gèrent déjà le transform(() => undefined) en haut du fichier
+      email: emailSch.optional(),
+      hireDate: hireDateSch.optional(),
+      userId: userIdSch.optional(),
 
-      // Ajout de .optional() car on ne modifie pas forcément le prénom à chaque update
+      // 2. ✅ CORRECTION : On applique l'union ici pour intercepter le "" avant d'appeler le schéma de base
       firstname: z
-        .string()
-        .trim()
-        .pipe(z.string().min(1, { message: "first name required" }))
+        .union([z.literal("").transform(() => undefined), firstnameSch])
         .optional(),
-
       lastname: z
-        .string()
-        .trim()
-        .pipe(z.string().min(1, { message: "last name required" }))
+        .union([z.literal("").transform(() => undefined), lastnameSch])
         .optional(),
-
-      hireDate: z.coerce.date({ error: "invalid date format" }),
-
       phoneNumber: z
-        .string({ error: "Phone number must be a string" })
-        .min(1, { message: "Phone number required" })
+        .union([z.literal("").transform(() => undefined), phoneNumberSch])
         .optional(),
 
-      positionId: z.coerce
-        .number({ error: "Position Id must be a valid number" })
-        .int({ error: "Position id must be a valid integer" })
-        .positive({ error: "Position ID must be a positive integer" })
-        .optional(),
-
-      userId: z
-        .union([
-          z.literal(""),
-          z
-            .string({ error: "user ID must be a string" })
-            .min(1, { message: "user ID required" }),
-        ])
+      // Fonctionne aussi pour le nombre car le transform s'exécute AVANT le coerce.number
+      positionId: z
+        .union([z.literal("").transform(() => undefined), positionIdSch])
         .optional(),
     })
     .refine(
       (data) => {
-        //const { updateFields } = data;
-        //console.log("____________data:", updateFields);
+        // Désormais, absolument TOUTES les chaînes vides "" de TOUS les champs
+        // sont converties en undefined. Le .refine est 100% fiable !
         return Object.values(data).some((field) => field !== undefined);
       },
       { error: "At least one field must be provided", path: ["body"] }
@@ -121,7 +105,7 @@ const remove = {
   params: z.object({
     id: z
       .string({ error: "Employee ID must be a string" })
-      .min(1, " Employee ID required "),
+      .min(1, { error: "Employee ID required" }),
   }),
 };
 

@@ -36,9 +36,11 @@ router.post("/login", validate(login), userController.login);
 router.post("/logout", userController.logout);
 router.post(
   "/",
-  checkToken,
-  checkIsAdmin,
+  //checkToken,
+  //checkIsAdmin,
+
   validate(create),
+  requireAdmin,
   rbac([
     { action: "READ", resource: "users" },
     { action: "CREATE", resource: "users" },
@@ -48,9 +50,11 @@ router.post(
 
 router.post(
   "/:id/roles",
-  checkToken,
-  checkIsAdmin,
+  //checkToken,
+  //checkIsAdmin,
+
   validate(assignRole),
+  requireAdmin,
   /* rbac([
     { action: "READ", resource: "user_roles" },
     { action: "CREATE", resource: "user_roles" },
@@ -60,9 +64,11 @@ router.post(
 
 router.patch(
   "/:id/roles",
-  checkToken,
-  checkIsAdmin,
+  //checkToken,
+  //checkIsAdmin,
+
   validate(modifyRole),
+  requireAdmin,
   /* rbac([
     { action: "READ", resource: "user_roles" },
     { action: "CREATE", resource: "user_roles" },
@@ -73,16 +79,19 @@ router.patch(
 
 router.patch(
   "/:id/isActive",
-  requireAdmin,
+
   validate(toggleStatus),
+  requireAdmin,
   userController.toggleStatus
 );
 
 router.delete(
   "/:id",
-  checkToken,
-  checkIsAdmin,
+  // checkToken,
+  // checkIsAdmin,
+
   validate(remove),
+  requireAdmin,
   /*rbac([
     { action: "READ", resource: "user_roles" },
     { action: "DELETE", resource: "user_roles" },

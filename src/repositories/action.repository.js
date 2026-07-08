@@ -1,12 +1,12 @@
 const prisma = require("../../prismaClient");
 
 const baseModelRepository = require("./base.repository");
-const { buildInclude } = require("./query-builders/user.query-builder");
+//const { buildInclude } = require("./query-builders/user.query-builder");
 
 //...baseModelRepository(prisma.User, buildInclude),
 const { findBy, findById, findAll } = baseModelRepository(
-  prisma.Action,
-  buildInclude
+  prisma.Action
+  // buildInclude
 );
 
 const actionRepository = {

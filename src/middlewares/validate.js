@@ -27,7 +27,6 @@ function validate(schemas) {
         errors,
       });
     }
-
     req.validatedData = validatedData;
     next();
   };

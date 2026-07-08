@@ -268,6 +268,39 @@ async function main() {
   });
   // }
 
+  // ==================================================
+  // ROOM STATUSES
+  // ==================================================
+
+  const roomStatuses = [
+    {
+      name: "AVAILABLE",
+      description: "The room is clean and ready for guests",
+    },
+    {
+      name: "OCCUPIED",
+      description: "A guest is currently staying in the room",
+    },
+    {
+      name: "CLEANING",
+      description: "Housekeeping is currently cleaning the room",
+    },
+    {
+      name: "MAINTENANCE",
+      description: "The room is under repair and unavailable",
+    },
+  ];
+
+  for (const status of roomStatuses) {
+    await prisma.roomStatus.upsert({
+      where: {
+        name: status.name,
+      },
+      update: {},
+      create: status,
+    });
+  }
+
   console.log("Seeding terminé.");
 }
 

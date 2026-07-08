@@ -30,9 +30,16 @@ app.use("/api/positions", require("./routes/position.router"));
 
 app.use("/api/employees", require("./routes/employee.router"));
 
+app.use("/api/room-types", require("./routes/room-type.router"));
+
+app.use("/api/room-statuses", require("./routes/room-status.router"));
+
+app.use("/api/rooms", require("./routes/room.router"));
+
 app.use("/api/actions", require("./routes/action.router"));
 
 app.use("/api/resources", require("./routes/resource.router"));
+
 app.listen(port, () => {
   console.log(`server runing on port ${port}`);
 });

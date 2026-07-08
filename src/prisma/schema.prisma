@@ -130,7 +130,7 @@ model Customer {
   email      String?
   created_at DateTime   @default(now())
   created_by String?
-  phone_num  String?
+  phone_number  String?
   updated_at DateTime   @updatedAt
   updated_by String?
   bookings   Booking[]
@@ -178,20 +178,32 @@ model RoomType {
   @@map("room_types")
 }
 
+model RoomStatus {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // Ex: "AVAILABLE", "OCCUPIED", "CLEANING", "MAINTENANCE"
+  description String?  // Pour expliquer à quoi sert ce statut
+  rooms       Room[]
+
+  @@map("room_statuses")
+}
+
+
 model Room {
   id             String           @id @default(uuid())
   room_type_id   Int
-  room_num       String           @unique
+  room_number    Int           @unique
+  room_name      String        @unique 
   created_at     DateTime         @default(now())
-  status         String
+  room_status_id Int?
   updated_at     DateTime         @updatedAt
   bookings       Booking[]
-  room_type      RoomType       @relation(fields: [room_type_id], references: [id])
+  roomType      RoomType       @relation(fields: [room_type_id], references: [id])
+  roomStatus    RoomStatus?    @relation(fields: [room_status_id], references: [id]) 
   roomCleanings RoomCleaning[]
   stays          Stay[]
 
   @@index([room_type_id])
-  @@index([status])
+  @@index([room_status_id])
   @@map("rooms")
 }
 

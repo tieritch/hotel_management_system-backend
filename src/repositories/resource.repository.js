@@ -2,7 +2,7 @@ const prisma = require("../../prismaClient");
 
 const baseModelRepository = require("./base.repository");
 
-const { buildInclude } = require("./query-builders/role.query-builder");
+const { buildInclude } = require("./query-builders/role");
 //...baseModelRepository(prisma.User, buildInclude),
 const { findBy, findById, findAll } = baseModelRepository(
   prisma.Resource,

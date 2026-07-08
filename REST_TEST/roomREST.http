@@ -1,0 +1,34 @@
+@baseUrl = http://localhost:8000
+### Find all rooms
+GET {{baseUrl}}/api/rooms?include=roomStatus
+###
+
+
+### Find room by id
+GET {{baseUrl}}/api/rooms/b712ea69-9c40-432c-8e50-0447da1e593e?include=roomType
+###
+
+
+
+
+### Create room
+POST {{baseUrl}}/api/rooms/
+Content-Type: application/json
+
+{
+"roomNumber": 5,
+"roomTypeId": 2
+}
+###
+
+### update room
+PATCH {{baseUrl}}/api/rooms/246e6ee1-febd-4e2f-997e-0462edb6d03b
+Content-Type: application/json
+
+{
+
+"roomTypeId": 3,
+"roomStatusId": 1233
+}
+###
+

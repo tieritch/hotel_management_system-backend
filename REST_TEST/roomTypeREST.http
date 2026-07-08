@@ -1,0 +1,35 @@
+@baseUrl = http://localhost:8000
+### Find all room types
+GET {{baseUrl}}/api/room-types
+###
+
+
+### Find room type by id
+GET {{baseUrl}}/api/room-types/2
+###
+
+### Create room type
+POST {{baseUrl}}/api/room-types/
+Content-Type: application/json
+
+{
+"name": "VIP",
+"basePrice": 1000,
+"description": "The best room"
+
+}
+###
+
+### update room type
+PATCH {{baseUrl}}/api/room-types/
+Content-Type: application/json
+
+{
+"name": "VIP",
+"basePrice": 1000,
+"description": "The best room"
+
+}
+###
+
+

@@ -13,14 +13,14 @@ model Position {
 }
  */
 const idSchema = z.coerce
-  .number({ message: "Position Id must be a valid number" })
-  .int({ message: "Position id must be a valid integer" })
-  .positive({ message: "Position ID must be a positive integer" });
+  .number({ error: "Position Id must be a valid number" })
+  .int({ error: "Position id must be a valid integer" })
+  .positive({ error: "Position ID must be a positive integer" });
 
 const create = {
   body: z.object({
     name: z
-      .string({ message: "position name must be a string" })
+      .string({ error: "position name must be a string" })
       .min(1, " position name can't be empty"),
   }),
 };
@@ -31,7 +31,7 @@ const update = {
   }),
   body: z.object({
     name: z
-      .string({ message: "Position name must be a valid string" })
+      .string({ error: "Position name must be a valid string" })
       .min(1, "Position name can't be empty"),
   }),
 };
