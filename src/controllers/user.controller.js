@@ -13,10 +13,10 @@ const userController = {
       const { include, ...filters } = req.query;
 
       let users = await userRepository.findAll(filters, include);
-      //  const { password_hash, ...otherUserKeys } = filters;
+      //  const { passwordHash, ...otherUserKeys } = filters;
       users = users
         .filter((user) => user.username.toLowerCase().trim() !== "admin")
-        .map(({ password_hash, ...otherUserKeys }) => ({ ...otherUserKeys }));
+        .map(({ passwordHash, ...otherUserKeys }) => ({ ...otherUserKeys }));
 
       res.status(200).json(users);
     } catch (err) {
@@ -32,10 +32,10 @@ const userController = {
       console.log("req query:", req.query);
       let user = await userRepository.findById(id, include);
       /*if (user) {
-        const { id, username, is_active, created_at, updated_at } = user;
-        user = { id, username, is_active, created_at, updated_at };
+        const { id, username, isActive, created_at, updated_at } = user;
+        user = { id, username, isActive, created_at, updated_at };
       }*/
-      const { password_hash, ...otherUserKeys } = user;
+      const { passwordHash, ...otherUserKeys } = user;
       user = otherUserKeys;
       res.status(200).json(user);
     } catch (err) {
@@ -55,10 +55,10 @@ const userController = {
 
       let user = await userRepository.create({
         username: username.trim().toLowerCase(),
-        password_hash: password,
+        passwordHash: password,
       });
 
-      const { password_hash, ...otherUserKeys } = user;
+      const { passwordHash, ...otherUserKeys } = user;
       user = otherUserKeys;
       return res.status(201).json(user);
     } catch (err) {
@@ -73,8 +73,8 @@ const userController = {
       const { id } = req.validatedData.params;
       const { roleIds } = req.validatedData.body;
       const data = roleIds.map((role) => ({
-        user_id: id,
-        role_id: role, //.roleId,
+        userId: id,
+        roleId: role, //.roleId,
       }));
 
       const count = await userRoleRepository.createMany(data);
@@ -95,12 +95,12 @@ const userController = {
       const { id } = req.validatedData.params;
       const { roleIds } = req.validatedData.body;
       const data = roleIds.map((role) => ({
-        user_id: id,
-        role_id: role, //.roleId,
+        userId: id,
+        roleId: role, //.roleId,
       }));
 
       const count = await prisma.$transaction(async (tx) => {
-        await tx.UserRole.deleteMany({ where: { user_id: id } });
+        await tx.UserRole.deleteMany({ where: { userId: id } });
         return tx.UserRole.createMany({ data });
       });
 
@@ -136,7 +136,7 @@ const userController = {
       //await bcrypt.compareSync()
       let user = await userRepository.findByUsername(username);
       if (user) {
-        const comp = await bcrypt.compare(password, user.password_hash);
+        const comp = await bcrypt.compare(password, user.passwordHash);
         //bcrypt.compare()
         if (!comp) {
           res.status(404).json({
@@ -169,8 +169,8 @@ const userController = {
             sameSite: isProduction ? "Strict" : "Lax",
           });
 
-        const { id, is_active, created_at, updated_at } = user;
-        user = { id, username, is_active, created_at, updated_at };
+        const { id, isActive, created_at, updated_at } = user;
+        user = { id, username, isActive, created_at, updated_at };
 
         res.status(200).json(user);
       } else {
@@ -202,10 +202,7 @@ const userController = {
       const { isActive } = req.validatedData.body;
       const user = await userRepository.findById(req.params.id);
       if (user) {
-        const updated = await userRepository.updateById(
-          { is_active: isActive },
-          id
-        );
+        const updated = await userRepository.updateById({ isActive }, id);
         return res.status(201).json({
           success: true,
           message: "user updated successfully",

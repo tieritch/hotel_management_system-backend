@@ -1,0 +1,37 @@
+@baseUrl = http://localhost:8000
+
+### Find all suppliers
+GET {{baseUrl}}/api/suppliers
+###
+
+
+### Find supplier by ID
+GET {{baseUrl}}/api/suppliers/dddddd
+###
+
+### Create supplier
+POST {{baseUrl}}/api/suppliers/
+Content-Type: application/json
+
+{
+"firstname": "Niyongabo11",
+"address":"gffdhfd f",
+"phoneNumber":"257 39 516 000",
+"email":"gfdd@gmail.com"
+
+}
+###
+
+### Update supplier
+PATCH {{baseUrl}}/api/suppliers/2b435bb8-e309-4acb-b18c-de1b6dca380a
+Content-Type: application/json
+
+{
+"firstname": "Niyongabo",
+"lastname": "Leon",
+"address":"gffdhfd f",
+
+"email":"gfdd@gmail.com"
+
+}
+###

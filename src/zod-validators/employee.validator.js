@@ -7,15 +7,11 @@ const { z } = require("zod");
 
 // 1. Schémas de base nettoyés et sécurisés contre les chaînes vides du Front
 const emailSch = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .pipe(
-    z.union([
-      z.literal("").transform(() => undefined), // Transforme "" en undefined pour la DB et le refine
-      z.email({ error: "Invalid email" }),
-    ])
-  );
+  .union([
+    z.literal("").transform(() => undefined),
+    z.email({ error: "Invalid email" }).trim().toLowerCase(),
+  ])
+  .optional();
 
 const firstnameSch = z
   .string({ error: "first name must be a string" })

@@ -1,6 +1,31 @@
 @baseUrl = http://localhost:8000
 
-### Find all users
-GET {{baseUrl}}/api/users?is_active=true
+### Find all positions
+GET {{baseUrl}}/api/positions?include=employees
+###
 
+### Find position by id
+GET {{baseUrl}}/api/positions/4
+###
+
+### Create position
+POST {{baseUrl}}/api/positions/
+Content-Type: application/json
+
+{
+"name": "High Position1"
+}
+###
+
+### update position
+PATCH {{baseUrl}}/api/positions/3
+Content-Type: application/json
+
+{
+"name": "housekeeper"
+}
+###
+
+### delete position
+DELETE {{baseUrl}}/api/positions/11
 ###
