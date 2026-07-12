@@ -40,6 +40,8 @@ app.use("/api/rooms", require("./routes/room.router"));
 
 app.use("/api/measuring-units", require("./routes/measuring-unit.router"));
 
+app.use("/api/movement-types", require("./routes/movement-type.router"));
+
 app.use("/api/actions", require("./routes/action.router"));
 
 app.use("/api/resources", require("./routes/resource.router"));
