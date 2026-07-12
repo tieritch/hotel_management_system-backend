@@ -1,5 +1,5 @@
 const { z } = require("zod");
-
+const { refineValidator, refineErrorMsg } = require("../utilities");
 const idSch = z.union([
   z.literal("").transform(() => undefined),
   z
@@ -54,12 +54,7 @@ const update = {
         .optional(),
       roomStatusId: roomStatusIdSch.optional(),
     })
-    .refine(
-      (data) => {
-        return Object.values(data).some((field) => field != undefined);
-      },
-      { error: "At least one field must be provided", path: ["body"] }
-    ),
+    .refine(refineValidator(), refineErrorMsg),
 };
 
 const remove = {

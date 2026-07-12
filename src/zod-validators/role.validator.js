@@ -1,4 +1,5 @@
 const { z } = require("zod");
+const { refineValidator, refineErrorMsg } = require("../utilities");
 
 const readPermission = z
   .object({
@@ -27,14 +28,7 @@ const update = {
       name: z.union([z.literal(""), z.string().min(4)]).optional(),
       permissions: z.union([z.literal(""), z.array(readPermission)]).optional(),
     })
-    .refine(
-      (data) =>
-        (data.name && data.name.trim() !== "") ||
-        (data.permissions && data.permissions.length > 0),
-      {
-        error: "Empty update is not allowed",
-      }
-    ),
+    .refine(refineValidator(), refineErrorMsg),
 };
 
 const remove = {

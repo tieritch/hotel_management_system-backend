@@ -4,6 +4,7 @@ req.validatedData;
 */
 
 const { z } = require("zod");
+const { refineValidator, refineErrorMsg } = require("../utilities");
 
 // 1. Schémas de base nettoyés et sécurisés contre les chaînes vides du Front
 const emailSch = z
@@ -87,14 +88,7 @@ const update = {
         .union([z.literal("").transform(() => undefined), positionIdSch])
         .optional(),
     })
-    .refine(
-      (data) => {
-        // Désormais, absolument TOUTES les chaînes vides "" de TOUS les champs
-        // sont converties en undefined. Le .refine est 100% fiable !
-        return Object.values(data).some((field) => field !== undefined);
-      },
-      { error: "At least one field must be provided", path: ["body"] }
-    ),
+    .refine(refineValidator(), refineErrorMsg),
 };
 
 const remove = {

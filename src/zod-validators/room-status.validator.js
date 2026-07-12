@@ -1,4 +1,5 @@
 const { z } = require("zod");
+const { refineValidator, refineErrorMsg } = require("../utilities");
 
 const idSch = z.coerce
   .number({ error: "Room status ID must be a valid number" })
@@ -29,12 +30,14 @@ const update = {
     id: idSch,
   }),
 
-  body: z.object({
-    name: z.union([z.literal(""), nameSch.trim().toLowerCase()]).optional(),
-    description: z
-      .union([z.literal("").transform(() => undefined), descSch])
-      .optional(),
-  }),
+  body: z
+    .object({
+      name: z.union([z.literal(""), nameSch.trim().toLowerCase()]).optional(),
+      description: z
+        .union([z.literal("").transform(() => undefined), descSch])
+        .optional(),
+    })
+    .refine(refineValidator(), refineErrorMsg),
 };
 
 const remove = {

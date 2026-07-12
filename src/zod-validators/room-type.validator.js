@@ -1,5 +1,5 @@
 const { z } = require("zod");
-
+const { refineValidator, refineErrorMsg } = require("../utilities");
 // 1. Schéma réutilisable pour les IDs
 const idSch = z.coerce
   .number({ error: "Room type ID must be a valid number" })
@@ -55,18 +55,7 @@ const update = {
         .union([z.literal("").transform(() => undefined), priceSch])
         .optional(),
     })
-    .refine(
-      (data) => {
-        // Grâce aux transformations ci-dessus, si le front envoie un formulaire vide
-        // l'objet final ne contiendra que des 'undefined'.
-        // Le .refine va donc bloquer la requête avec succès !
-        return Object.values(data).some((field) => field !== undefined);
-      },
-      {
-        error: "At least one field must be provided",
-        path: ["body"], // Ciblage précis pour votre format d'erreur
-      }
-    ),
+    .refine(refineValidator(), refineErrorMsg),
 };
 
 const remove = {

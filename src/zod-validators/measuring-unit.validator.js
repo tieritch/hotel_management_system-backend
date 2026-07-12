@@ -1,4 +1,5 @@
 const { z } = require("zod");
+const { refineValidator, refineErrorMsg } = require("../utilities");
 
 const idSch = z.coerce
   .number({ error: "Measuring ID must be a valid number" })
@@ -24,14 +25,16 @@ const create = {
 
 const update = {
   params: z.object({ id: idSch }),
-  body: z.object({
-    name: z
-      .union([z.literal("").transform(() => undefined), nameSch])
-      .optional(),
-    description: z
-      .union([z.literal("").transform(() => undefined), descSch])
-      .optional(),
-  }),
+  body: z
+    .object({
+      name: z
+        .union([z.literal("").transform(() => undefined), nameSch])
+        .optional(),
+      description: z
+        .union([z.literal("").transform(() => undefined), descSch])
+        .optional(),
+    })
+    .refine(refineValidator(), refineErrorMsg),
 };
 
 const remove = {

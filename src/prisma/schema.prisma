@@ -374,7 +374,6 @@ model MeasuringUnit {
 model InventoryItem {
   id              String            @id @default(uuid())
   name            String            @unique
-  sku             String?           @unique
   currentStock    Decimal           @db.Decimal(12, 2) @default(0.00) @map("current_stock")
   minStockLevel   Decimal?          @db.Decimal(12, 2) @map("min_stock_level")
   unitCost        Decimal           @db.Decimal(12, 2) @default(0.00) @map("unit_cost")
