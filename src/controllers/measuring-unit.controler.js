@@ -27,10 +27,12 @@ const measuringUnitController = {
 
   async create(req, res) {
     try {
-      let { name, description } = req.validatedData.body;
-      name = name.toLowerCase().trim();
+      let bodyData = req.validatedData.body;
+      /*name = name.toLowerCase().trim();
       description = description.toLowerCase().trim();
-      const unit = await measuringUnitRepository.create({ name, description });
+      const convertTo = req.validatedData.body.convertTo;
+      const conversionFactor = req.validatedData.body.conversionFactor;*/
+      const unit = await measuringUnitRepository.create(bodyData);
       res.status(201).json({ success: "true", data: unit });
     } catch (err) {
       handleDBError(err, res, "MeasuringUnit");
@@ -40,12 +42,12 @@ const measuringUnitController = {
   async update(req, res) {
     try {
       const { id } = req.validatedData.params;
-      let { name, description } = req.validatedData.body;
-      name = name.toLowerCase().trim();
-      description = description.toLowerCase().trim();
+      let bodyData = req.validatedData.body;
+      // name = name.toLowerCase().trim();
+      // description = description.toLowerCase().trim();
       //const bodyData = req.validatedData.body;
-      const updateData = mapZodToDb({ name, description });
-      const updated = await measuringUnitRepository.updateById(updateData, id);
+      //const updateData = mapZodToDb({ name, de);
+      const updated = await measuringUnitRepository.updateById(bodyData, id);
       return res.status(201).json({ success: "true", data: updated });
     } catch (err) {
       handleDBError(err, res, "MeasuringUnit");
