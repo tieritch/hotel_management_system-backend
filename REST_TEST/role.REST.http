@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:8000
 
 ### Find all roles
-GET {{baseUrl}}/api/roles
+GET {{baseUrl}}/api/roles?include=users
 
 ###
 
@@ -26,7 +26,7 @@ POST {{baseUrl}}/api/roles/
 Content-Type: application/json
 
 {
-"name": "receptionner7", 
+"name": "receptionner00", 
 "permissions":[
 {"actionId":"342c7989-6aa7-43e7-b7d4-6cf5482d21df",
 "resourceId":"52bd8e30-8822-4945-b015-05b7a755c88e"
@@ -39,7 +39,7 @@ Content-Type: application/json
 ###
 
 ### Remove a role
-DELETE {{baseUrl}}/api/roles/9b9b740b-ecd6-4990-989e-c36361d58633
+DELETE {{baseUrl}}/api/roles/30603dc5-44c9-4fdf-b92f-4ce73e023a61
 ####
 
 ### Modify role

@@ -1,9 +1,9 @@
 @baseUrl = http://localhost:8000
-### Find all rooms
-GET {{baseUrl}}/api/rooms?include=roomStatus 
+### Find all room statuses
+GET {{baseUrl}}/api/room-statuses?include=rooms
 ###
 
 
-### Find room by id
-GET {{baseUrl}}/api/rooms/246e6ee1-febd-4e2f-997e-0462edb6d03b
+### Find room status by id
+GET {{baseUrl}}/api/room-statuses/1
 ###

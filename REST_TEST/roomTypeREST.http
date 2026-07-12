@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8000
 ### Find all room types
-GET {{baseUrl}}/api/room-types
+GET {{baseUrl}}/api/room-types?include=rooms
 ###
 
 
@@ -13,23 +13,26 @@ POST {{baseUrl}}/api/room-types/
 Content-Type: application/json
 
 {
-"name": "VIP",
-"basePrice": 1000,
+"name": "VIP Elite",
+"basePrice": 2000,
 "description": "The best room"
 
 }
 ###
 
 ### update room type
-PATCH {{baseUrl}}/api/room-types/
+PATCH {{baseUrl}}/api/room-types/7
 Content-Type: application/json
 
 {
-"name": "VIP",
+"name": "VIP1",
 "basePrice": 1000,
 "description": "The best room"
-
 }
 ###
 
+
+###
+DELETE {{baseUrl}}/api/room-types/7
+###
 

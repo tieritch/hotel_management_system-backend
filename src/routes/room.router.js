@@ -6,7 +6,7 @@ const { roomController } = require("../controllers");
 const { checkToken, validate, rbac } = require("../middlewares");
 
 const {
-  //idInt,
+
   create,
   remove,
   update,

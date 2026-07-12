@@ -354,15 +354,46 @@ model Transaction {
 // ==================================================
 // INVENTORY & STOCK MANAGEMENT
 // ==================================================
-
 model MeasuringUnit {
-  id             Int             @id @default(autoincrement())
-  name           String          @unique
-  description    String
-  menuItems      MenuItem[]
-  inventoryItems InventoryItem[]
+  id               Int             @id @default(autoincrement())
+  name             String          @unique // Ex: "bottle_juice_65cl", "pack_sugar_1kg", "cl", "g"
+  description      String          // Ex: "Bouteille de jus (65 cl)", "Gramme"
+  
+  // CORRECTION : Vos deux colonnes de conversion simples, sans aucune liaison complexe
+  convertTo        String?         @map("convert_to")         // Ex: "cl" ou "g" (Optionnel)
+  conversionFactor Decimal         @db.Decimal(12, 2) @default(1.00) @map("conversion_factor") // Ex: 65.00 ou 1000.00
 
+  // Liens standards avec le reste de votre application
+  menuItems        MenuItem[]
+  purchaseItemUnits InventoryItem[] @relation("PurchaseUnitRelation")
+  retailItemUnits   InventoryItem[] @relation("RetailUnitRelation")
+  
   @@map("measuring_units")
+}
+
+model InventoryItem {
+  id              String            @id @default(uuid())
+  name            String            @unique
+  sku             String?           @unique
+  currentStock    Decimal           @db.Decimal(12, 2) @default(0.00) @map("current_stock")
+  minStockLevel   Decimal?          @db.Decimal(12, 2) @map("min_stock_level")
+  unitCost        Decimal           @db.Decimal(12, 2) @default(0.00) @map("unit_cost")
+  retailPrice     Decimal?          @db.Decimal(12, 2) @map("retail_price")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  purchaseUnitId  Int               @map("purchase_unit_id")
+  retailUnitId    Int               @map("retail_unit_id")
+
+  purchaseUnit    MeasuringUnit     @relation("PurchaseUnitRelation", fields: [purchaseUnitId], references: [id])
+  retailUnit      MeasuringUnit     @relation("RetailUnitRelation", fields: [retailUnitId], references: [id])
+  
+  movements       StockMovement[]
+  purchaseItems   PurchaseOrderItem[]
+
+  @@index([purchaseUnitId])
+  @@index([retailUnitId])
+  @@map("inventory_items")
 }
 
 enum MovementType {
@@ -370,25 +401,6 @@ enum MovementType {
   OUT
   LOSS
   ADJUSTMENT
-}
-
-model InventoryItem {
-  id            String              @id @default(uuid())
-  name          String              @unique
-  sku           String?             @unique
-  currentStock  Decimal             @db.Decimal(12, 2) @default(0.00) @map("current_stock")
-  minStockLevel Decimal?            @db.Decimal(12, 2) @map("min_stock_level")
-  unitCost      Decimal             @db.Decimal(12, 2) @default(0.00) @map("unit_cost")
-  createdAt     DateTime            @default(now()) @map("created_at")
-  updatedAt     DateTime            @updatedAt @map("updated_at")
-  measuringUnitId Int               @map("measuring_unit_id")
-
-  measuringUnit MeasuringUnit       @relation(fields: [measuringUnitId], references: [id])
-  movements     StockMovement[]
-  purchaseItems PurchaseOrderItem[]
-
-  @@index([measuringUnitId])
-  @@map("inventory_items")
 }
 
 model StockMovement {
@@ -416,11 +428,12 @@ model PurchaseOrder {
   id           String            @id @default(uuid())
   orderNumber  String            @unique @map("order_number")
   status       OrderStatus       @default(PENDING)
-  supplierName String?           @map("supplier_name")
+  supplier_id  String 
   createdAt    DateTime          @default(now()) @map("created_at")
   updatedAt    DateTime          @updatedAt @map("updated_at")
 
   items        PurchaseOrderItem[]
+  supplier     Supplier @relation(fields:[supplier_id], references:[id] )
 
   @@map("purchase_orders")
 }
@@ -438,4 +451,15 @@ model PurchaseOrderItem {
   @@index([purchaseOrderId])
   @@index([inventoryItemId])
   @@map("purchase_order_items")
+}
+
+model Supplier {
+  id               String      @id @default(uuid())
+  firstname        String
+  lastname         String?
+  address          String?
+  phoneNumber      String      @unique @map("phone_number")
+  email            String?     @unique
+  purchaseOrders  PurchaseOrder[]
+  @@map("suppliers")
 }

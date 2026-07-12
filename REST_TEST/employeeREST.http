@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:8000
 
 ### Find all employees
-GET {{baseUrl}}/api/employees
+GET {{baseUrl}}/api/employees?include=position
 
 ###
 
@@ -14,7 +14,7 @@ POST {{baseUrl}}/api/employees/
 Content-Type: application/json
 
 {
-"email": "luc1@gmail.com",
+"email": "lucien@gmail.com",
 "firstname":"luc",
 "lastname":"Emery2",
 "hireDate":"12/25/2024",
@@ -29,7 +29,7 @@ DELETE {{baseUrl}}/api/employees/00b78e69-099c-4756-9632-c423742fe892
 ###
 
 ### Updatean employee
-PATCH {{baseUrl}}/api/employees/37fbcc8d-11d4-4a75-8ea7-ddf56463fcc7
+PATCH {{baseUrl}}/api/employees/59755d29-0e28-4825-b299-67e241f57935
 Content-Type: application/json
 
 {
@@ -38,7 +38,7 @@ Content-Type: application/json
 "lastname":"Emery2",
 "hireDate":"12/18/2024",
 "phoneNumber":"+257 68 542 123",
-"positionId":2
+"positionId":3
 }
 ###
 

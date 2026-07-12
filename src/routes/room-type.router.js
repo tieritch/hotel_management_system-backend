@@ -6,6 +6,7 @@ const {
   remove,
   update,
 } = require("../zod-validators/room-type.validator");
+
 const { checkToken, validate, rbac } = require("../middlewares");
 
 const router = express.Router();

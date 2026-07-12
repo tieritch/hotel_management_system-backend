@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:8000
 
 ### Find all users
-GET {{baseUrl}}/api/users/?include=roles
+GET {{baseUrl}}/api/users
 
 ###
 
@@ -19,8 +19,7 @@ Content-Type: application/json
 
 {
 "username": "john4",
-"password": "Passord123",
-
+"password": "Passord123"
 
 }
 ###
