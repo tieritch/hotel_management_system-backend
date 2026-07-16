@@ -1,0 +1,37 @@
+@baseUrl = http://localhost:8000
+### Find all inventory items
+GET {{baseUrl}}/api/inventory-items?include=stockMovements
+###
+
+### Find  inventory item by id
+GET {{baseUrl}}/api/inventory-items/3c77448d-e1b6-4316-b133-28a73e00edc3
+###
+
+
+### Create   a product
+POST {{baseUrl}}/api/inventory-items
+Content-Type: application/json
+
+{
+"name": "Riz",
+
+"currentStock": 100,
+ "unitCost": 150,
+ "retailPrice":75,
+ "purchaseUnitId": 2,
+ "retailUnitId": 3
+}
+###
+
+### Update   a product
+PATCH {{baseUrl}}/api/inventory-items/74d5838b-f421-49b3-b811-de58a752e7e1
+Content-Type: application/json
+
+{
+
+"currentStock": 95
+}
+###
+
+### delete a product
+DELETE {{baseUrl}}/api/inventory-items/62dee299-2169-41c7-9a98-ef3a75e00029

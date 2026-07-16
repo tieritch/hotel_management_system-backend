@@ -44,6 +44,8 @@ app.use("/api/movement-types", require("./routes/movement-type.router"));
 
 app.use("/api/order-statuses", require("./routes/order-status.router"));
 
+app.use("/api/inventory-items", require("./routes/inventory-item.router"));
+
 app.use("/api/actions", require("./routes/action.router"));
 
 app.use("/api/resources", require("./routes/resource.router"));

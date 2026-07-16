@@ -387,7 +387,7 @@ model InventoryItem {
   purchaseUnit    MeasuringUnit     @relation("PurchaseUnitRelation", fields: [purchaseUnitId], references: [id])
   retailUnit      MeasuringUnit     @relation("RetailUnitRelation", fields: [retailUnitId], references: [id])
   
-  movements       StockMovement[]
+  stockMovements       StockMovement[]
   purchaseItems   PurchaseOrderItem[]
 
   @@index([purchaseUnitId])
@@ -411,7 +411,7 @@ model StockMovement {
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
 
-  inventoryItem  InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
 
   @@index([inventoryItemId])
   @@map("stock_movements")
