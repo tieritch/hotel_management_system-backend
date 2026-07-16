@@ -1,5 +1,5 @@
 const { z } = require("zod");
-const { refineValidator, refineErrorMsg } = require("../utilities");
+//const { refineValidator, refineErrorMsg } = require("../utilities");
 
 const idSch = z.coerce
   .number({ error: "Measuring ID must be a valid number" })
@@ -40,12 +40,17 @@ const conversionFactorSch = z
   .optional();
 
 const create = {
-  body: z.object({
-    name: nameSch,
-    description: descSch,
-    convertTo: convertToSch,
-    conversionFactor: conversionFactorSch,
-  }),
+  body: z
+    .object({
+      name: nameSch,
+      description: descSch,
+      convertTo: convertToSch,
+      conversionFactor: conversionFactorSch,
+    })
+    .refine((data) => {
+      if (!data.convertTo) data.convertTo = data.name;
+      return true;
+    }),
 };
 
 const update = {
@@ -61,7 +66,18 @@ const update = {
       convertTo: convertToSch,
       conversionFactor: conversionFactorSch,
     })
-    .refine(refineValidator(), refineErrorMsg),
+    .refine(
+      (data) => {
+        return data.name || data.description || data.convertTo;
+      },
+      {
+        error:
+          "At least name, description or conversion unit must be provided ",
+      }
+    )
+    .refine((data) => !(!data.conversionFactor && data.convertTo), {
+      error: "conversion factor must be provided",
+    }),
 };
 
 const remove = {

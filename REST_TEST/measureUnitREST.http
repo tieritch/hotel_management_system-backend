@@ -14,22 +14,24 @@ POST {{baseUrl}}/api/measuring-units
 Content-Type: application/json
 
 {
-"name": "Assi",
-"description": "Une Assiette"
+"name": "gallon1",
+"description": "120 centiliters"
+
 }
 ###
 
 ### Update   measuring units
-PATCH  {{baseUrl}}/api/measuring-units/5
+PATCH  {{baseUrl}}/api/measuring-units/68
 Content-Type: application/json
 
 {
-"name": "Assi",
-"description": "Une Assiete pleine"
+"name": "Gallon",
+"description": "110 centillitre",
+"convertTo": "cl"
 }
 ###
 
 
 ### Delete  measuring units by id
-DELETE  {{baseUrl}}/api/measuring-units/6
+DELETE  {{baseUrl}}/api/measuring-units/69
 ###

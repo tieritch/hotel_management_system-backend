@@ -1,6 +1,6 @@
 const { success } = require("zod");
 const { measuringUnitRepository } = require("../repositories");
-const { handleDBError, mapZodToDb } = require("../utilities");
+const { handleDBError } = require("../utilities");
 
 const measuringUnitController = {
   async findAll(req, res) {
